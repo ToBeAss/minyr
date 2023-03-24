@@ -1,3 +1,3 @@
-module main.go
+module minyr
 
 go 1.18
