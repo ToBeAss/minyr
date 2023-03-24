@@ -1,9 +1,21 @@
 package main
 
 import (
-	"fmt"
+	"os"
+	"log"
 )
 
 func main(){
-	fmt.Println("Hei");
+	src, err := os.Open("table.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer src.Close()
+	log.Println(src)
+	
+	var buffer []byte
+	var linebuf []byte
+	buffer = make([]byte, 1)
+
+	bytesCount := 0
 }
