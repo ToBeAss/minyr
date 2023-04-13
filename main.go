@@ -5,6 +5,7 @@ import (
 	"log"
 	"io"
 	"strings"
+	"strconv"
 	"github.com/ToBeAss/funtemps/conv"
 )
 
@@ -14,13 +15,20 @@ func main(){
 		log.Fatal(err)
 	}
 	defer src.Close()
-	log.Println(src)
+
+	newFile, err := os.Create("table_fahr.csv")
+	if err != nil {
+    		log.Fatal(err)
+	}
+	defer newFile.Close()
 
 	var buffer []byte
 	var linebuf []byte
+	var newLine string
 	buffer = make([]byte, 1)
 
 	bytesCount := 0
+	linesCount := 0
 	for {
 		_, err := src.Read(buffer)
 		if err != nil && err != io.EOF {
@@ -29,13 +37,30 @@ func main(){
 
 		bytesCount++
 		if buffer[0] == 0x0A {
-			log.Println(string(linebuf))
-			// Her
+			linesCount++;
 			elementArray := strings.Split(string(linebuf), ";")
+			log.Println(newLine)
+			//log.Println(string(linebuf))
 			if len(elementArray) > 3 {
-				celsius := elementArray[3]
-				fahr := conv.CelsiusToFahrenheit(celsius)
-				log.Println(elementArray[3])
+				if linesCount > 1 {
+					if len(elementArray[3]) == 0 {
+						newLine = "Data er basert paa gyldig data (per 18.03.2023) (CC BY 4.0) fra Meteorologisk institutt (MET);endringen er gjort av Tobias Molland;;"
+						newFile.Write([]byte(newLine))
+					} else {
+						celsius, err := strconv.ParseFloat(elementArray[3], 64)
+						if err != nil {
+							log.Fatal(err)
+						} else {
+							fahr := conv.CelsiusToFahrenheit(celsius)
+							newLine = elementArray[0] + ";" + elementArray[1] + ";" + elementArray[2] + ";" + fahr + "\n"
+							//log.Println(fahr)
+							newFile.Write([]byte(newLine))
+						}
+					}
+				} else {
+					newLine = string(linebuf) + "\n"
+					newFile.Write([]byte(newLine))
+				}
 			}
 			linebuf = nil
 		} else {
