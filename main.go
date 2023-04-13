@@ -10,13 +10,13 @@ import (
 )
 
 func main(){
-	src, err := os.Open("table.csv")
+	src, err := os.Open("kjevik-temp-celsius-20220318-20230318.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer src.Close()
 
-	newFile, err := os.Create("table_fahr.csv")
+	newFile, err := os.Create("kjevik-temp-fahr-20220318-20230318.csv")
 	if err != nil {
     		log.Fatal(err)
 	}
@@ -39,8 +39,6 @@ func main(){
 		if buffer[0] == 0x0A {
 			linesCount++;
 			elementArray := strings.Split(string(linebuf), ";")
-			log.Println(newLine)
-			//log.Println(string(linebuf))
 			if len(elementArray) > 3 {
 				if linesCount > 1 {
 					if len(elementArray[3]) == 0 {
@@ -50,12 +48,10 @@ func main(){
 						celsius, err := strconv.ParseFloat(elementArray[3], 64)
 						if err != nil {
 							log.Fatal(err)
-						} else {
+						}
 							fahr := conv.CelsiusToFahrenheit(celsius)
 							newLine = elementArray[0] + ";" + elementArray[1] + ";" + elementArray[2] + ";" + fahr + "\n"
-							//log.Println(fahr)
 							newFile.Write([]byte(newLine))
-						}
 					}
 				} else {
 					newLine = string(linebuf) + "\n"
