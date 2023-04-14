@@ -133,14 +133,11 @@ func writeToFile(lineCount int, elementArray []string, linebuf []byte) []byte {
 }
 
 func getAllTemperatures(lineCount int, elementArray []string, temperatureSlice []float64) {
-	log.Println("getAllTemperatures")
 	if lineCount > 1 && len(elementArray[3]) > 0 {
-		log.Println("Past logic")
 		float, err := strconv.ParseFloat(elementArray[3], 64)
 		if err != nil {
 			logError(err)
 		}
-		log.Println(float)
 		temperatureSlice = append(temperatureSlice, float)
 	}
 }
