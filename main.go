@@ -143,7 +143,7 @@ func writeToFile(lineCount int, elementArray []string, linebuf []byte) []byte {
 	} else if len(elementArray[3]) != 0 { // Sjekker om tredje rute har innhold
 		celsius, err := strconv.ParseFloat(elementArray[3], 64)
 		logError(err)
-		fahr := conv.CelsiusToFahrenheit(celsius)
+		fahr := fmt.Sprintf("%.1f", conv.CelsiusToFahrenheit(celsius))
 		newLine = elementArray[0] + ";" + elementArray[1] + ";" + elementArray[2] + ";" + fahr + "\n"
 	} else { // Siste linje blir erstattet i dette tilfellet
 		newLine = "Data er basert paa gyldig data (per 18.03.2023) (CC BY 4.0) fra Meteorologisk institutt (MET);endringen er gjort av Tobias Molland;;"
