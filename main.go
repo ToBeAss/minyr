@@ -26,7 +26,7 @@ func main() {
 		if inputHistory[len(inputHistory)-1] == "convert" {
 			if input == "y" {
 				fmt.Println("Genererer filen paa nytt")
-				processFiles()
+				processFiles(inputHistory)
 				inputHistory = append(inputHistory, input)
 				fmt.Println("Fil generert")
 			} else if input == "n" {
@@ -55,7 +55,7 @@ func main() {
 				fmt.Println("Filen med Fahrenheit maalinger eksisterer allerede. Vil du erstatte den?")
 			} else {
 				fmt.Println("Genererer fil")
-				processFiles()
+				processFiles(inputHistory)
 				inputHistory = append(inputHistory, "blank")
 				fmt.Println("Fil generert")
 			}
@@ -74,7 +74,7 @@ func logError(err error) {
 	}
 }
 
-func processFiles() {
+func processFiles(inputHistory []string) {
 	src, err := os.Open("kjevik-temp-celsius-20220318-20230318.csv")
 	logError(err)
 	defer src.Close()
@@ -114,6 +114,14 @@ func processFiles() {
 		if err == io.EOF {
 			break
 		}
+	}
+	if inputHistory[len(inputHistory)-1] == "average" {
+		sum := .0
+		for i := 0; i < len(temperatureSlice); i++ {
+			sum += (temperatureSlice[i])
+		}
+		average := sum / float64(len(temperatureSlice))
+		fmt.Printf("Gjennomsnittstemperaturen for perioden var %.2f grader Celsius", average)
 	}
 }
 
