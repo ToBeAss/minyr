@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-
-	"minyr/yr"
+	//"minyr/yr"
 )
 
 func main() {
