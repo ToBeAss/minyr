@@ -135,11 +135,14 @@ func writeToFile(lineCount int, elementArray []string, linebuf []byte) []byte {
 }
 
 func getAllTemperatures(lineCount int, elementArray []string, temperatureSlice []float64) {
-	if lineCount != 1 && len(elementArray[3]) != 0 {
+	log.Println("getAllTemperatures")
+	if lineCount > 1 && len(elementArray[3]) > 0 {
+		log.Println("Past logic")
 		float, err := strconv.ParseFloat(elementArray[3], 64)
 		if err != nil {
 			logError(err)
 		}
+		log.Println(float)
 		temperatureSlice = append(temperatureSlice, float)
 	}
 }
@@ -151,5 +154,6 @@ func calculateAverage() float64 {
 		sum += (temperatureSlice[i])
 	}
 	average := sum / float64(len(temperatureSlice))
+	//log.Println(temperatureSlice[0])
 	return average
 }
