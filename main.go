@@ -28,6 +28,7 @@ func main() {
 				inputHistory = append(inputHistory, input)
 				fmt.Println("Genererer filen paa nytt")
 				processFiles()
+				fmt.Println("Fil generert")
 			} else if input == "n" {
 				inputHistory = append(inputHistory, input)
 				fmt.Println("Endringer ble ikke lagret")
@@ -51,8 +52,10 @@ func main() {
 				fmt.Println("Filen med Fahrenheit maalinger eksisterer allerede. Vil du erstatte den?")
 				logError(err)
 			} else {
+				inputHistory = append(inputHistory, "blank")
 				fmt.Println("Genererer fil")
 				processFiles()
+				fmt.Println("Fil generert")
 			}
 		} else if input == "average" {
 			inputHistory = append(inputHistory, input)
