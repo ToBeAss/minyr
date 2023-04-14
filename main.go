@@ -26,7 +26,7 @@ func main() {
 		if inputHistory[len(inputHistory)-1] == "convert" {
 			if input == "y" {
 				fmt.Println("Genererer filen paa nytt")
-				processFiles(inputHistory)
+				convertTemperature("kjevik-temp-celsius-20220318-20230318.csv")
 				inputHistory = append(inputHistory, input)
 				fmt.Println("Fil generert")
 			} else if input == "n" {
@@ -38,11 +38,11 @@ func main() {
 		} else if inputHistory[len(inputHistory)-1] == "average" {
 			if input == "c" {
 				fmt.Println("Printer ut gjennomsnittstemperatur i Celsius")
-				//fmt.Printf("%.2f", calculateAverage())
+				calculateAverage("kjevik-temp-celsius-20220318-20230318.csv", input)
 				inputHistory = append(inputHistory, input)
 			} else if input == "f" {
 				fmt.Println("Printer ut gjennomsnittstemperatur i Fahrenheit")
-				//fmt.Printf("%.2f", calculateAverage())
+				calculateAverage("kjevik-temp-fahr-20220318-20230318.csv", input)
 				inputHistory = append(inputHistory, input)
 			} else {
 				fmt.Println("Svar c eller f")
@@ -55,7 +55,7 @@ func main() {
 				fmt.Println("Filen med Fahrenheit maalinger eksisterer allerede. Vil du erstatte den?")
 			} else {
 				fmt.Println("Genererer fil")
-				processFiles(inputHistory)
+				convertTemperature("kjevik-temp-celsius-20220318-20230318.csv")
 				inputHistory = append(inputHistory, "blank")
 				fmt.Println("Fil generert")
 			}
@@ -74,39 +74,55 @@ func logError(err error) {
 	}
 }
 
-func processFiles(inputHistory []string) {
-	src, err := os.Open("kjevik-temp-celsius-20220318-20230318.csv")
-	logError(err)
-	defer src.Close()
-
+func convertTemperature(filepath string) {
 	newFile, err := os.Create("kjevik-temp-fahr-20220318-20230318.csv")
 	logError(err)
 	defer newFile.Close()
+	processFile(filepath, "convert", newFile)
+}
+
+func calculateAverage(filepath string, input string) {
+	sum, count := processFile(filepath, "average", nil)
+	var average float64
+	if count > 0 {
+		average = sum / float64(count)
+	}
+	fmt.Printf("Den gjennomsnittlige temperaturen på Kjevik i perioden er %.2f°%v \n", average, strings.ToUpper(input))
+}
+
+func processFile(filepath string, operation string, newFile *os.File) (float64, int) {
+	file, err := os.Open(filepath)
+	if err != nil {
+		logError(err)
+	}
+	defer file.Close()
 
 	var buffer []byte
 	var linebuf []byte
 	buffer = make([]byte, 1)
 
-	byteCount := 0
 	lineCount := 0
-	var temperatureSlice []float64
+	var temperatureSum float64
+	var count int
 
 	for {
-		_, err := src.Read(buffer) // Leser av ett og ett tegn
+		_, err := file.Read(buffer) // Leser av ett og ett tegn
 		if err != io.EOF {
 			logError(err)
 		}
-		byteCount++
 
 		if buffer[0] != 0x0A { // Frem til tegnet for linjeskift, legges hvert tegn til i linebuf
 			linebuf = append(linebuf, buffer[0])
 		} else { // Ved linjeskift velges det hva som skal skrives til den nye filen og linebuf nullstilles
 			lineCount++
 
-			elementArray := strings.Split(string(linebuf), ";") // Deler linjen opp i "ruter" ved semikolon (;)
+			elementArray := strings.Split(string(linebuf), ";")
 			if len(elementArray) > 3 {
-				newFile.Write(writeToFile(lineCount, elementArray, linebuf))
-				getAllTemperatures(lineCount, elementArray, temperatureSlice)
+				if operation == "convert" {
+					newFile.Write(writeToFile(lineCount, elementArray, linebuf))
+				} else if operation == "average" {
+					temperatureSum, count = sumTemperature(lineCount, elementArray, temperatureSum, count)
+				}
 			}
 			linebuf = nil
 		}
@@ -115,14 +131,7 @@ func processFiles(inputHistory []string) {
 			break
 		}
 	}
-	if inputHistory[len(inputHistory)-1] == "average" {
-		sum := .0
-		for i := 0; i < len(temperatureSlice); i++ {
-			sum += (temperatureSlice[i])
-		}
-		average := sum / float64(len(temperatureSlice))
-		fmt.Printf("Gjennomsnittstemperaturen for perioden var %.2f grader Celsius", average)
-	}
+	return temperatureSum, count
 }
 
 func writeToFile(lineCount int, elementArray []string, linebuf []byte) []byte {
@@ -140,22 +149,14 @@ func writeToFile(lineCount int, elementArray []string, linebuf []byte) []byte {
 	return []byte(newLine)
 }
 
-func getAllTemperatures(lineCount int, elementArray []string, temperatureSlice []float64) {
-	if lineCount > 1 && len(elementArray[3]) > 0 {
-		float, err := strconv.ParseFloat(elementArray[3], 64)
+func sumTemperature(lineCount int, elementArray []string, temperatureSum float64, count int) (float64, int) {
+	if lineCount > 1 && elementArray[3] != "" {
+		temperature, err := strconv.ParseFloat(elementArray[3], 64) // Deler linjen opp i "ruter" ved semikolon (;)
 		if err != nil {
 			logError(err)
 		}
-		temperatureSlice = append(temperatureSlice, float)
+		temperatureSum += temperature
+		count++
 	}
+	return temperatureSum, count
 }
-
-/*func calculateAverage() float64 {
-	sum := .0
-	for i := 0; i < len(temperatureSlice); i++ {
-		sum += (temperatureSlice[i])
-	}
-	average := sum / float64(len(temperatureSlice))
-	//log.Println(temperatureSlice[0])
-	return average
-}*/
