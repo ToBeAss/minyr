@@ -38,11 +38,11 @@ func main() {
 		} else if inputHistory[len(inputHistory)-1] == "average" {
 			if input == "c" {
 				fmt.Println("Printer ut gjennomsnittstemperatur i Celsius")
-				fmt.Printf("%.2f", calculateAverage())
+				//fmt.Printf("%.2f", calculateAverage())
 				inputHistory = append(inputHistory, input)
 			} else if input == "f" {
 				fmt.Println("Printer ut gjennomsnittstemperatur i Fahrenheit")
-				fmt.Printf("%.2f", calculateAverage())
+				//fmt.Printf("%.2f", calculateAverage())
 				inputHistory = append(inputHistory, input)
 			} else {
 				fmt.Println("Svar c eller f")
@@ -74,7 +74,7 @@ func logError(err error) {
 	}
 }
 
-func processFiles() []float64 {
+func processFiles() {
 	src, err := os.Open("kjevik-temp-celsius-20220318-20230318.csv")
 	logError(err)
 	defer src.Close()
@@ -107,7 +107,6 @@ func processFiles() []float64 {
 			if len(elementArray) > 3 {
 				newFile.Write(writeToFile(lineCount, elementArray, linebuf))
 				getAllTemperatures(lineCount, elementArray, temperatureSlice)
-				return temperatureSlice
 			}
 			linebuf = nil
 		}
@@ -116,7 +115,6 @@ func processFiles() []float64 {
 			break
 		}
 	}
-	return nil
 }
 
 func writeToFile(lineCount int, elementArray []string, linebuf []byte) []byte {
@@ -147,8 +145,7 @@ func getAllTemperatures(lineCount int, elementArray []string, temperatureSlice [
 	}
 }
 
-func calculateAverage() float64 {
-	temperatureSlice := processFiles()
+/*func calculateAverage() float64 {
 	sum := .0
 	for i := 0; i < len(temperatureSlice); i++ {
 		sum += (temperatureSlice[i])
@@ -156,4 +153,4 @@ func calculateAverage() float64 {
 	average := sum / float64(len(temperatureSlice))
 	//log.Println(temperatureSlice[0])
 	return average
-}
+}*/
