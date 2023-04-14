@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ToBeAss/funtemps/conv"
+	"minyr/yr"
 )
 
 func main() {
@@ -138,17 +138,14 @@ func processFile(filepath string, operation string, newFile *os.File) (float64, 
 
 func writeToFile(lineCount int, elementArray []string, linebuf []byte) []byte {
 	var newLine string
+	var err error
 	if lineCount == 1 { // Første linje forblir lik
-		newLine = string(linebuf) + "\n"
-	} else if len(elementArray[3]) != 0 { // Sjekker om tredje rute har innhold
-		celsius, err := strconv.ParseFloat(elementArray[3], 64)
+		newLine = string(linebuf)
+	} else {
+		newLine, err = yr.CelsiusToFahrenheitLine(string(linebuf))
 		logError(err)
-		fahr := fmt.Sprintf("%.1f", conv.CelsiusToFahrenheit(celsius))
-		newLine = elementArray[0] + ";" + elementArray[1] + ";" + elementArray[2] + ";" + fahr + "\n"
-	} else { // Siste linje blir erstattet i dette tilfellet
-		newLine = "Data er basert paa gyldig data (per 18.03.2023) (CC BY 4.0) fra Meteorologisk institutt (MET);endringen er gjort av Tobias Molland;;"
 	}
-	return []byte(newLine)
+	return []byte(newLine + "\n")
 }
 
 func sumTemperature(lineCount int, elementArray []string, temperatureSum float64, count int) (float64, int) {
