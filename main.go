@@ -74,7 +74,7 @@ func logError(err error) {
 	}
 }
 
-func processFiles() (int, []string, []byte) {
+func processFiles() []float64 {
 	src, err := os.Open("kjevik-temp-celsius-20220318-20230318.csv")
 	logError(err)
 	defer src.Close()
@@ -89,6 +89,7 @@ func processFiles() (int, []string, []byte) {
 
 	byteCount := 0
 	lineCount := 0
+	var temperatureSlice []float64
 
 	for {
 		_, err := src.Read(buffer) // Leser av ett og ett tegn
@@ -105,7 +106,8 @@ func processFiles() (int, []string, []byte) {
 			elementArray := strings.Split(string(linebuf), ";") // Deler linjen opp i "ruter" ved semikolon (;)
 			if len(elementArray) > 3 {
 				newFile.Write(writeToFile(lineCount, elementArray, linebuf))
-				return lineCount, elementArray, linebuf
+				getAllTemperatures(lineCount, elementArray, temperatureSlice)
+				return temperatureSlice
 			}
 			linebuf = nil
 		}
@@ -114,7 +116,7 @@ func processFiles() (int, []string, []byte) {
 			break
 		}
 	}
-	return 0, nil, nil
+	return nil
 }
 
 func writeToFile(lineCount int, elementArray []string, linebuf []byte) []byte {
@@ -132,11 +134,7 @@ func writeToFile(lineCount int, elementArray []string, linebuf []byte) []byte {
 	return []byte(newLine)
 }
 
-func getAllTemperatures(temperatureSlice []float64) {
-	lineCount, elementArray, linebuf := processFiles()
-	if linebuf != nil {
-
-	}
+func getAllTemperatures(lineCount int, elementArray []string, temperatureSlice []float64) {
 	if lineCount != 1 && len(elementArray[3]) != 0 {
 		float, err := strconv.ParseFloat(elementArray[3], 64)
 		if err != nil {
@@ -147,9 +145,8 @@ func getAllTemperatures(temperatureSlice []float64) {
 }
 
 func calculateAverage() float64 {
-	var temperatureSlice []float64
+	temperatureSlice := processFiles()
 	sum := .0
-	getAllTemperatures(temperatureSlice)
 	for i := 0; i < len(temperatureSlice); i++ {
 		sum += (temperatureSlice[i])
 	}
